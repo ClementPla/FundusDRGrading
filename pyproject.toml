@@ -1,0 +1,43 @@
+[project]
+name = "FundusDiabeticRetinopathyClassification"
+version = "0.1.0"
+description = "Diabetic Retinopathy Grading"
+dependencies = [
+    "albumentations",
+    "torch",
+    "torchvision",
+    "numpy",
+    "opencv-python-headless",
+    "pandas",
+    "matplotlib",
+    "scikit-learn",
+    "scipy",
+    "tqdm",
+    "pytorch-lightning",
+    "nntools @ git+https://github.com/ClementPla/NNTools@attrs_dataset",
+    "attrs",
+    "timm",
+    "wandb",
+    "torchmetrics",
+    "torch_scatter"
+]
+readme = "README.md"
+
+
+[project.scripts]
+train = "fundusClassif.scripts.train:train"
+
+[project.optional-dependencies]
+dev = ["black", "ruff", "pre-commit"]
+
+notebook = ["ipykernel", "matplotlib"]
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "I", "RUF", "TCH"]
+fixable = ["I", "RUF100", "TCH"]
+fix = true
+
