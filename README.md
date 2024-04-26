@@ -1,44 +1,47 @@
 ![header](imgs/header.png)
-# Vision Transformers applied To Fundus Images
 
-This repository contains my personal experiments regarding the training of Vision Transformers and customized derivatives on fundus images
+# Fundus DR Grading
 
-This work is *in progress* and definetly **not production ready**.
+[![Rye](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/rye/main/artwork/badge.json)](https://rye-up.com)
+[![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/docs/stable/index.html)
+[![Lightning](https://img.shields.io/badge/Lightning-792ee5?logo=lightning&logoColor=white)](https://lightning.ai/docs/pytorch/stable/)
 
-## Adapting the RETFound
+## Description
 
-Our code uses pretrained weights, either on ImageNet (coming from the great [timm library](https://timm.fast.ai/)) or from the Retinal Foundation Model [RETFound](https://github.com/rmaphoh/RETFound_MAE/tree/main). Please cite them accordingly if you use this code.
+This project aims to evaluate the performance of different models for the classification of diabetic retinopathy (DR) in fundus images. The reported perfomance metrics are not always consistent in the literature. Our goal is to provide a fair comparison between different models using the same datasets and evaluation protocol.
 
-This repository adapts these models to fit in the [pytorch-lightning](https://lightning.ai/) and [Weights and Biases](https://wandb.ai/) framework for ease of experimentation.
+## Installation
 
-## Dynamic Tokens Resampling
+To install the project and its dependencies, you can use the following commands:
 
-We explore the dynamic resampling of the tokens sequence within the Transformer. The idea is to proceed with multiple forward passes at progressively increasing resolutions. At each *scale*, we resample the sequence to only keep the most relevant tokens based on the Attention activations of the previous scales. The **max_tokens** argument in the [config file](configs/config.yaml) indicates the maximum length of each sequence.
-
-This idea is heavily inspired of our [Focused Attention](https://www.sciencedirect.com/science/article/pii/S1361841522002377) paper, but adapted for training. We can track the selected tokens over the differents scales to get some insights on what the model is using in the input image to predict the grade of the disease.
-
-|Image | Refined Attention|
-:---------------:|:---------------:
-![](figures/_tmp_images/batch_8.png) | ![](figures/_tmp_attn/batch_8.png)
-
-
-## Running the code
-
-```
-git clone
-cd RetinalViT
+```sh
+pip install -r requirements.lock
 pip install .
-train
 ```
 
-You will need to adjust the path to the data (EyePACS and APTOS dataset) in the file [config file](configs/config.yaml)
+## Usage
+To train the model, you can use the [train script](src/fundusClassif/scripts/train.py) entrypoint:
 
-To finetune the RetFound, you will also need to download [their weights](https://drive.google.com/file/d/1l62zbWUFTlp214SvK6eMwPQZAzcwoeBE/view?usp=sharing).
-
-
-You will need to copy the weights in folder:
+```sh
+train --model <model_name>
 ```
-cd RetinalViT
-mkdir pretrained_weights
-mv your_location_to_retfoundWeights pretrained_weights/RETfound_cfp_weights.pth
+
+## Development
+This project uses pre-commit for managing and maintaining pre-commit hooks. Make sure to install the dev dependencies:
+```sh
+pip install -r requirements-dev.lock
+pip install -e .
+```
+
+For better project management, we recommend using [Rye](https://rye-up.com/) to manage dependencies, building, and testing the project.
+
+```sh
+curl -sSf https://rye-up.com/get | bash
+rye sync --all-features
+```
+
+Then install the pre-commit hooks:
+```sh
+pre-commit install
+rye run pre-commit install # With Rye
 ```
