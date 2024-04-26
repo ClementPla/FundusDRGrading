@@ -23,14 +23,14 @@ train = "fundusClassif.scripts.train:train"
 
 [project.optional-dependencies]
 dev = ["black", "ruff", "pre-commit"]
-
 notebook = ["ipykernel", "matplotlib"]
-
-[tool.black]
-line-length = 120
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "RUF", "TCH"]
 fixable = ["I", "RUF100", "TCH"]
-fix = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["fundusClassif"]
