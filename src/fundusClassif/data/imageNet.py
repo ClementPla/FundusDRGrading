@@ -148,7 +148,7 @@ class ImageNetDataModule(LightningDataModule):
         )
 
     def human_readable_label(self, i: int):
-        return self.labels[self.train.map_class['label'][int(i)]]
+        return self.labels[self.train.map_class["label"][int(i)]]
 
     def human_readable_labels(self, labels):
         return [self.human_readable_label(label) for label in labels]

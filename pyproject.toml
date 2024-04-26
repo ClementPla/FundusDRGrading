@@ -29,12 +29,12 @@ packages = ["src/fundusClassif"]
 
 [tool.rye]
 managed = true
+dev-dependencies = ["pre-commit>=3.7.0"]
 
 [project.scripts]
 train = "fundusClassif.scripts.train:train"
 
 [project.optional-dependencies]
-dev = ["black", "ruff", "pre-commit"]
 notebook = ["ipykernel", "matplotlib"]
 
 [tool.ruff]

@@ -32,11 +32,11 @@ if __name__ == "__main__":
         "vit_large_patch14_dinov2",
         "vit_small_patch14_dinov2",
         "vit_base_patch14_reg4_dinov2.lvd142m",
-        "vit_large_patch14_reg4_dinov2.lvd142m"
+        "vit_large_patch14_reg4_dinov2.lvd142m",
     ]
-    results = {"Model":[], "MACs":[], "Params":[]}
+    results = {"Model": [], "MACs": [], "Params": []}
     for m in list_models:
-        with torch.autocast('cuda'):
+        with torch.autocast("cuda"):
             print(f"Running model {m}")
             try:
                 model = timm.create_model(m, pretrained=True, num_classes=5, img_size=512)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             model = model.cuda()
             try:
                 macs, params = profile(model, inputs=(dummy_data,), verbose=False)
-                out = model(dummy_data)                
+                out = model(dummy_data)
                 results["Model"].append(m)
                 results["MACs"].append(macs)
                 results["Params"].append(params)
@@ -54,6 +54,6 @@ if __name__ == "__main__":
                 print(f"Model {m} has {macs} MACs and {params} parameters")
             except Exception as e:
                 print(f"Model {m} failed with error {e}")
-    
+
     df = pd.DataFrame(results)
     df.to_csv("models_macs_params.csv", index=False)

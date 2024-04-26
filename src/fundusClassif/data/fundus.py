@@ -39,8 +39,16 @@ def fundus_autocrop(image: np.ndarray):
 
 
 class FundusDataModule(LightningDataModule):
-    def __init__(self, data_dir, img_size=(512, 512), valid_size=0.1, batch_size=64, num_workers=32, 
-                 use_cache=False, cache_option=NNOpt.CACHE_DISK):
+    def __init__(
+        self,
+        data_dir,
+        img_size=(512, 512),
+        valid_size=0.1,
+        batch_size=64,
+        num_workers=32,
+        use_cache=False,
+        cache_option=NNOpt.CACHE_DISK,
+    ):
         super(FundusDataModule, self).__init__()
         self.img_size = img_size
         self.root_img = data_dir
@@ -52,8 +60,7 @@ class FundusDataModule(LightningDataModule):
                 self.cache_option = NNOpt.CACHE_DISK
             case "memory" | NNOpt.CACHE_MEMORY:
                 self.cache_option = NNOpt.CACHE_MEMORY
-            
-                     
+
         if num_workers == "auto":
             self.num_workers = os.cpu_count() // torch.cuda.device_count()
         else:
@@ -69,7 +76,11 @@ class FundusDataModule(LightningDataModule):
             train_composer = Composition()
 
             train_composer.add(
-                fundus_autocrop, *self.img_size_ops(), *self.data_aug_ops(), CacheBullet(), *self.normalize_and_cast_op()
+                fundus_autocrop,
+                *self.img_size_ops(),
+                *self.data_aug_ops(),
+                CacheBullet(),
+                *self.normalize_and_cast_op(),
             )
             self.val.composer = test_composer
             self.train.composer = train_composer
@@ -170,13 +181,12 @@ class EyePACSDataModule(FundusDataModule):
             self.val.composer = None
             self.train.remap("level", "label")
             self.val.remap("level", "label")
-            
 
         if stage == "test":
             self.test = ClassificationDataset(
                 os.path.join(self.root_img, "test/images/"),
                 use_cache=self.use_cache,
-                cache_option=self.cache_option,   
+                cache_option=self.cache_option,
                 shape=self.img_size,
                 keep_size_ratio=True,
                 file_column="image",

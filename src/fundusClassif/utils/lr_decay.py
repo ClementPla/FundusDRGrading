@@ -4,9 +4,7 @@
 # --------------------------------------------------------
 
 
-def param_groups_lrd(
-    model, weight_decay: float = 0.05, no_weight_decay_list=[], layer_decay: float = 0.75
-):
+def param_groups_lrd(model, weight_decay: float = 0.05, no_weight_decay_list=[], layer_decay: float = 0.75):
     """
     Parameter groups for layer-wise lr decay
     Following BEiT: https://github.com/microsoft/unilm/blob/master/beit/optim_factory.py#L58

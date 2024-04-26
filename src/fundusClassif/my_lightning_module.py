@@ -1,6 +1,5 @@
 from typing import Any
 
-import pytorch_lightning
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -11,7 +10,7 @@ from timm.data.mixup import Mixup
 from fundusClassif.models.model_factory import create_model
 
 
-class TrainerModule(pytorch_lightning.LightningModule):
+class TrainerModule(pl.LightningModule):
     def __init__(self, network_config: dict, training_config: dict) -> None:
         super().__init__()
 
