@@ -5,17 +5,12 @@ description = "Diabetic Retinopathy Grading"
 dependencies = [
     "albumentations",
     "torch",
-    "torchvision",
     "numpy",
     "opencv-python-headless",
     "pandas",
-    "matplotlib",
     "scikit-learn",
-    "scipy",
-    "tqdm",
     "pytorch-lightning",
     "nntools @ git+https://github.com/ClementPla/NNTools@attrs_dataset",
-    "attrs",
     "timm",
     "wandb",
     "torchmetrics",
@@ -39,4 +34,3 @@ line-length = 120
 select = ["E", "F", "I", "RUF", "TCH"]
 fixable = ["I", "RUF100", "TCH"]
 fix = true
-
