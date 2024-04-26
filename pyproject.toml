@@ -17,6 +17,18 @@ dependencies = [
 ]
 readme = "README.md"
 
+[build-system]
+requires = ["hatchling", "wheel"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fundusClassif"]
+
+[tool.rye]
+managed = true
 
 [project.scripts]
 train = "fundusClassif.scripts.train:train"
