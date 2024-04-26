@@ -10,6 +10,7 @@ data:
   batch_size: 14
   valid_size: 4000
   num_workers: auto
+  use_cache: True
 
 model:
   architecture: mobilenet_v3large

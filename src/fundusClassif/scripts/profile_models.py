@@ -30,7 +30,9 @@ if __name__ == "__main__":
         "vit_large_patch16_384",
         "vit_base_patch14_dinov2",
         "vit_large_patch14_dinov2",
-        "vit_small_patch14_dinov2"
+        "vit_small_patch14_dinov2",
+        "vit_base_patch14_reg4_dinov2.lvd142m",
+        "vit_large_patch14_reg4_dinov2.lvd142m"
     ]
     results = {"Model":[], "MACs":[], "Params":[]}
     for m in list_models:

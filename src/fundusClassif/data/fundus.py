@@ -6,7 +6,9 @@ import numpy as np
 import torch
 from albumentations.pytorch.transforms import ToTensorV2
 from nntools.dataset import ClassificationDataset, Composition, nntools_wrapper, random_split
-from nntools.dataset.utils import class_weighting
+from nntools.dataset.composer import CacheBullet
+from nntools.dataset.utils.balance import class_weighting
+from nntools.utils.const import NNOpt
 from pytorch_lightning import LightningDataModule
 from sklearn.model_selection import StratifiedKFold
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
@@ -20,7 +22,7 @@ def filter_name(name: str):
 @nntools_wrapper
 def fundus_autocrop(image: np.ndarray):
     r_img = image[:, :, 0]
-    _, mask = cv2.threshold(r_img, 15, 1, cv2.THRESH_BINARY)
+    _, mask = cv2.threshold(r_img, 10, 1, cv2.THRESH_BINARY)
 
     not_null_pixels = cv2.findNonZero(mask)
     mask = mask.astype(np.uint8)
@@ -37,7 +39,8 @@ def fundus_autocrop(image: np.ndarray):
 
 
 class FundusDataModule(LightningDataModule):
-    def __init__(self, data_dir, img_size=(512, 512), valid_size=0.1, batch_size=64, num_workers=32, use_cache=False):
+    def __init__(self, data_dir, img_size=(512, 512), valid_size=0.1, batch_size=64, num_workers=32, 
+                 use_cache=False, cache_option=NNOpt.CACHE_DISK):
         super(FundusDataModule, self).__init__()
         self.img_size = img_size
         self.root_img = data_dir
@@ -50,20 +53,21 @@ class FundusDataModule(LightningDataModule):
             self.num_workers = num_workers
         self.use_cache = use_cache
         self.persistent_workers = True
+        self.cache_option = cache_option
 
     def setup(self, stage: str):
         test_composer = Composition()
-        test_composer.add(fundus_autocrop, *self.img_size_ops(), *self.normalize_and_cast_op())
+        test_composer.add(fundus_autocrop, *self.img_size_ops(), CacheBullet(), *self.normalize_and_cast_op())
 
         if stage == "fit" or stage == "validate":
             train_composer = Composition()
 
             train_composer.add(
-                fundus_autocrop, *self.img_size_ops(), *self.data_aug_ops(), *self.normalize_and_cast_op()
+                fundus_autocrop, *self.img_size_ops(), *self.data_aug_ops(), CacheBullet(), *self.normalize_and_cast_op()
             )
             self.val.composer = test_composer
             self.train.composer = train_composer
-        elif stage == "test":   
+        elif stage == "test":
             self.test.composer = test_composer
 
     @property
@@ -138,13 +142,14 @@ class EyePACSDataModule(FundusDataModule):
     def setup(self, stage: str) -> None:
         if stage == "fit" or stage == "validate":
             dataset = ClassificationDataset(
-                os.path.join(self.root_img, "train/images_resize/"),
+                os.path.join(self.root_img, "train/images/"),
                 label_filepath=os.path.join(self.root_img, "trainLabels.csv"),
                 file_column="image",
                 gt_column="level",
                 shape=self.img_size,
                 keep_size_ratio=True,
-                use_cache=False,
+                use_cache=self.use_cache,
+                cache_option=self.cache_option,
                 auto_pad=True,
                 extract_image_id_function=filter_name,
             )
@@ -166,7 +171,9 @@ class EyePACSDataModule(FundusDataModule):
 
         if stage == "test":
             self.test = ClassificationDataset(
-                os.path.join(self.root_img, "test/images_resize/"),
+                os.path.join(self.root_img, "test/images/"),
+                use_cache=self.use_cache,
+                cache_option=self.cache_option,   
                 shape=self.img_size,
                 keep_size_ratio=True,
                 file_column="image",
