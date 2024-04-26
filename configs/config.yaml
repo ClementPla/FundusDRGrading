@@ -11,6 +11,7 @@ data:
   valid_size: 4000
   num_workers: auto
   use_cache: True
+  cache_option: disk  # or memory
 
 model:
   architecture: mobilenet_v3large

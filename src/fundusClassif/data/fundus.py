@@ -47,13 +47,19 @@ class FundusDataModule(LightningDataModule):
         self.valid_size = valid_size
         self.batch_size = batch_size // torch.cuda.device_count()
         self.train = self.val = self.test = None
+        match cache_option:
+            case "disk" | NNOpt.CACHE_DISK:
+                self.cache_option = NNOpt.CACHE_DISK
+            case "memory" | NNOpt.CACHE_MEMORY:
+                self.cache_option = NNOpt.CACHE_MEMORY
+            
+                     
         if num_workers == "auto":
             self.num_workers = os.cpu_count() // torch.cuda.device_count()
         else:
             self.num_workers = num_workers
         self.use_cache = use_cache
         self.persistent_workers = True
-        self.cache_option = cache_option
 
     def setup(self, stage: str):
         test_composer = Composition()
@@ -164,10 +170,7 @@ class EyePACSDataModule(FundusDataModule):
             self.val.composer = None
             self.train.remap("level", "label")
             self.val.remap("level", "label")
-
-            if self.use_cache:
-                self.train.use_cache = True
-                self.train.init_cache()
+            
 
         if stage == "test":
             self.test = ClassificationDataset(
