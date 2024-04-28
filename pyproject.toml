@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Diabetic Retinopathy Grading"
 dependencies = [
     "albumentations",
-    "torch",
+    "torch==2.2.1",
     "numpy",
     "opencv-python-headless",
     "pandas",
@@ -16,6 +16,8 @@ dependencies = [
     "wandb",
     "torchmetrics",
     "thop",
+    "einops",
+    "torch-scatter==2.1.2+pt22cu121",
     "rich"
 ]
 readme = "README.md"
@@ -33,6 +35,11 @@ packages = ["src/fundusClassif"]
 [tool.rye]
 managed = true
 dev-dependencies = ["pre-commit>=3.7.0"]
+
+[[tool.rye.sources]]
+name = "pyg"
+url = "https://data.pyg.org/whl/torch-2.2.1+cu121.html"
+type = "find-links"
 
 [project.scripts]
 train = "fundusClassif.scripts.train:train"

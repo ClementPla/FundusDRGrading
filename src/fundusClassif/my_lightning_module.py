@@ -48,8 +48,13 @@ class TrainerModule(pl.LightningModule, PyTorchModelHubMixin):
     def training_step(self, data, batch_index) -> STEP_OUTPUT:
         image = data["image"]
         gt = data["label"]
-        logits = self.model(image)
-        loss = self.get_loss(logits, gt)
+        if hasattr(self.model, "training_step"):
+            loss = self.model.training_step(image, gt)
+            assert isinstance(loss, torch.Tensor) and loss.numel() == 1  # Ensure that the loss is a scalar
+        else:
+            logits = self.model(image)
+            loss = self.get_loss(logits, gt)
+
         self.log("train_loss", loss, on_epoch=True, on_step=True, sync_dist=True, prog_bar=True)
         return loss
 
