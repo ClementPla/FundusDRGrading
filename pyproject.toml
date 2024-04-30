@@ -11,6 +11,7 @@ dependencies = [
     "scikit-learn",
     "pytorch-lightning",
     "nntools @ git+https://github.com/ClementPla/NNTools@attrs_dataset",
+    "fundus-data-toolkit @ git+https://github.com/ClementPla/fundus-data-toolkit",
     "timm",
     "wandb",
     "torchmetrics",
