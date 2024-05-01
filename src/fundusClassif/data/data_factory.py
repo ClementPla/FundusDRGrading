@@ -1,4 +1,3 @@
-from collections import namedtuple
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List
@@ -11,6 +10,7 @@ from fundus_data_toolkit.datamodules.classification import (
     IDRiDDataModule,
 )
 from fundus_data_toolkit.datamodules.utils import merge_existing_datamodules
+from tqdm import tqdm
 
 
 class FundusDataset(Enum):
@@ -52,20 +52,20 @@ def get_datamodule_from_config(config: Dict[str, str], dataset_args):
     datasets = [FundusDataset(d.upper()) for d in config]
     return get_datamodule(datasets, dataset_args)
 
+
 def precache_datamodule(config: Dict[str, str], dataset_args):
     datamodule = get_datamodule_from_config(config, dataset_args)
     train_dataloader = datamodule.train_dataloader()
-    for _ in train_dataloader:
+    for _ in tqdm(train_dataloader, total=len(train_dataloader)):
         pass
     if datamodule.val:
         val_dataloader = datamodule.val_dataloader()
-        for _ in val_dataloader:
+        for _ in tqdm(val_dataloader, total=len(val_dataloader)):
             pass
     if datamodule.test:
         test_dataloader = datamodule.test_dataloader()
         if not isinstance(test_dataloader, list):
             test_dataloader = [test_dataloader]
-        for dl in test_dataloader:
+        for dl in tqdm(test_dataloader, total=len(test_dataloader)):
             for _ in dl:
                 pass
-        
