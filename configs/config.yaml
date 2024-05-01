@@ -10,7 +10,6 @@ datasets:
   idrid: /home/tmp/clpla/data/data/IDRID/B. Disease Grading/ 
   ddr: /home/tmp/clpla/data/DDR-dataset/DR_grading/
 
-
 data:
   img_size: *img_shape
   batch_size: 14

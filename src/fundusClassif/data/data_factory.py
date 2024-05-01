@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
-from fundus_data_toolkit.datamodules import CLASSIF_PATHS
+from fundus_data_toolkit.datamodules import CLASSIF_PATHS, Task, register_paths
 from fundus_data_toolkit.datamodules.classification import (
     AptosDataModule,
     DDRDataModule,
@@ -20,31 +20,30 @@ class FundusDataset(Enum):
     DDR: str = "DDR"
 
 
-def setup_data_toolkit(paths: Dict[FundusDataset, Path]):
-    global CLASSIF_PATHS
-    CLASSIF_PATHS = namedtuple("CLASSIF_PATHS", paths.keys())(*paths.values())
+def setup_data_toolkit(paths: Dict[str, Path]):
+    register_paths(paths, Task.CLASSIFICATION)
 
 
 def setup_data_from_config(datasets: Dict[str, str]):
     paths = {}
     for dataset in datasets:
-        dataset_enum = FundusDataset(dataset.upper())
-        paths[dataset_enum] = Path(datasets[dataset])
+        paths[dataset] = Path(datasets[dataset])
+        assert paths[dataset].exists(), f"Path {paths[dataset]} does not exist"
     setup_data_toolkit(paths)
 
 
-def get_datamodule(datasets: List[FundusDataset], dataset_args):
+def get_datamodule(datasets: List[str], dataset_args):
     all_datamodules = []
     for d in datasets:
-        match d:
+        match FundusDataset(d.upper()):
             case FundusDataset.IDRID:
-                all_datamodules.append(IDRiDDataModule(**dataset_args).setup_all())
+                all_datamodules.append(IDRiDDataModule(CLASSIF_PATHS.IDRID, **dataset_args).setup_all())
             case FundusDataset.EYEPACS:
-                all_datamodules.append(EyePACSDataModule(**dataset_args).setup_all())
+                all_datamodules.append(EyePACSDataModule(CLASSIF_PATHS.EYEPACS, **dataset_args).setup_all())
             case FundusDataset.APTOS:
-                all_datamodules.append(AptosDataModule(**dataset_args).setup_all())
+                all_datamodules.append(AptosDataModule(CLASSIF_PATHS.APTOS, **dataset_args).setup_all())
             case FundusDataset.DDR:
-                all_datamodules.append(DDRDataModule(**dataset_args).setup_all())
+                all_datamodules.append(DDRDataModule(CLASSIF_PATHS.DDR, **dataset_args).setup_all())
     return merge_existing_datamodules(all_datamodules)
 
 
@@ -70,4 +69,3 @@ def precache_datamodule(config: Dict[str, str], dataset_args):
             for _ in dl:
                 pass
         
-    

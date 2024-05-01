@@ -2,6 +2,7 @@ from nntools.utils import Config
 from fundusClassif.data.data_factory import precache_datamodule
 
 
+
 def main():
     config = Config("configs/config.yaml")
     
