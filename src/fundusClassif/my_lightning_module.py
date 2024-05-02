@@ -60,25 +60,11 @@ class TrainerModule(pl.LightningModule):
                 )
             )
         self.test_metrics = nn.ModuleList(test_metrics)
-        
-        mixup_config = training_config.get("mixup", None)
-        if mixup_config is not None and any(
-            [
-                mixup_config["mixup_alpha"] > 0,
-                mixup_config["cutmix_alpha"] > 0,
-                mixup_config["cutmix_minmax"] is not None,
-            ]
-        ):
-            self.mixup = Mixup(**mixup_config)
-        else:
-            self.mixup = None
-
+    
+    
     def training_step(self, data, batch_index) -> STEP_OUTPUT:
         image = data["image"]
         gt = data["label"]
-        if self.mixup is not None:
-            image, gt = self.mixup(image, gt)
-
         logits = self.model(image)
         loss = self.get_loss(logits, gt)
         self.log("train_loss", loss, on_epoch=True, on_step=True, sync_dist=True, prog_bar=True)
