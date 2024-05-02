@@ -1,3 +1,11 @@
+"""
+We only use Mixup/CutMix for classification tasks. For regression, we could try to implement:
+C-Mixup: Improving Generalization in Regression
+https://arxiv.org/pdf/2210.05775
+
+Repository:
+https://github.com/huaxiuyao/C-Mixup
+"""
 from typing import Any
 
 from pytorch_lightning import Trainer
