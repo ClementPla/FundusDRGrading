@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 import torchmetrics
 from pytorch_lightning.utilities.types import STEP_OUTPUT
-from timm.data.mixup import Mixup
 
 from fundusClassif.models.model_factory import create_model
 
@@ -60,8 +59,7 @@ class TrainerModule(pl.LightningModule):
                 )
             )
         self.test_metrics = nn.ModuleList(test_metrics)
-    
-    
+
     def training_step(self, data, batch_index) -> STEP_OUTPUT:
         image = data["image"]
         gt = data["label"]
@@ -113,7 +111,7 @@ class TrainerModule(pl.LightningModule):
         )
         return [optimizer], [
             {
-                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, factor=0.1, mode="min"),
+                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, factor=0.5, mode="min"),
                 "monitor": "val_loss",
                 "interval": "epoch",
                 "frequency": 1,

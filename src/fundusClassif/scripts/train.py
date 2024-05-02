@@ -10,10 +10,11 @@ from pytorch_lightning.callbacks import (
     ModelCheckpoint,
 )
 
+from fundusClassif.callbacks.callback_factory import get_callbacks
 from fundusClassif.data.data_factory import get_datamodule_from_config
 from fundusClassif.my_lightning_module import TrainerModule
 from fundusClassif.utils.logger import get_wandb_logger
-from fundusClassif.callbacks.callback_factory import get_callbacks
+
 torch.set_float32_matmul_precision("medium")
 
 

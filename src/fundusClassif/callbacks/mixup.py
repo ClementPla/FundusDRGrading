@@ -1,8 +1,11 @@
 from typing import Any
 
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import Callback
+from pytorch_lightning.utilities.rank_zero import rank_zero_warn
 from timm.data.mixup import Mixup
+
+from fundusClassif.my_lightning_module import TrainerModule
 
 
 class MixupCallback(Callback):
@@ -11,14 +14,25 @@ class MixupCallback(Callback):
         
         
         self.mixup = Mixup(mixup_alpha=mixup_alpha, cutmix_alpha=cutmix_alpha, cutmixminmax=cutmix_minmax, prob=prob,
-                           switch_prob=switch_prob, mode=mode, correct_lam=correct_lam, label_smoothing=label_smoothing)
+                           switch_prob=switch_prob, mode=mode, correct_lam=correct_lam, label_smoothing=label_smoothing, 
+                           num_classes=num_classes)
+    
+        self._activated = True
 
-    def on_train_batch_start(self, trainer: Trainer, pl_module: LightningModule, batch: Any, batch_idx: int) -> None:
-        image = batch["image"]
-        gt = batch["label"]
-        
-        image, gt = self.mixup(image, gt)
-        batch["image"] = image
-        batch["label"] = gt
-        
-        return super().on_train_batch_start(trainer, pl_module, batch, batch_idx)
+    def on_fit_start(self, trainer: Trainer, pl_module: TrainerModule) -> None:
+        self._activated = not pl_module.as_regression
+        if not self._activated:
+            rank_zero_warn("Mixup is not activated for regression tasks")
+    
+    def on_train_batch_start(self, trainer: Trainer, pl_module: TrainerModule, batch: Any, batch_idx: int) -> None:
+        if not self._activated:
+            pass
+        else:
+            image = batch["image"]
+            gt = batch["label"]
+            
+            image, gt = self.mixup(image, gt)
+            batch["image"] = image
+            batch["label"] = gt
+            
+            return super().on_train_batch_start(trainer, pl_module, batch, batch_idx)
