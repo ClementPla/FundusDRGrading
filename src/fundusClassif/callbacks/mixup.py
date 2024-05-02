@@ -21,7 +21,7 @@ class MixupCallback(Callback):
                  mode='batch', correct_lam=True, label_smoothing=0.1, num_classes=1000):
         
         
-        self.mixup = Mixup(mixup_alpha=mixup_alpha, cutmix_alpha=cutmix_alpha, cutmixminmax=cutmix_minmax, prob=prob,
+        self.mixup = Mixup(mixup_alpha=mixup_alpha, cutmix_alpha=cutmix_alpha, cutmix_minmax=cutmix_minmax, prob=prob,
                            switch_prob=switch_prob, mode=mode, correct_lam=correct_lam, label_smoothing=label_smoothing, 
                            num_classes=num_classes)
     

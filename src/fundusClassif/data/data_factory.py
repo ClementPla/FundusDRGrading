@@ -42,7 +42,7 @@ def get_datamodule(datasets: List[str], dataset_args):
                 all_datamodules.append(
                     IDRiDDataModule(
                         CLASSIF_PATHS.IDRID, precise_autocrop=True, 
-                        da_type=DAType.HEAVY,
+                        data_augmentation_type=DAType.HEAVY,
                         flag=cv2.IMREAD_COLOR, **dataset_args
                     ).setup_all()
                 )
@@ -50,7 +50,7 @@ def get_datamodule(datasets: List[str], dataset_args):
                 all_datamodules.append(
                     EyePACSDataModule(
                         CLASSIF_PATHS.EYEPACS, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
-                        da_type=DAType.HEAVY,
+                        data_augmentation_type=DAType.HEAVY,
                         **dataset_args
                     ).setup_all()
                 )
@@ -58,7 +58,7 @@ def get_datamodule(datasets: List[str], dataset_args):
                 all_datamodules.append(
                     AptosDataModule(
                         CLASSIF_PATHS.APTOS, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
-                        da_type=DAType.HEAVY,
+                        data_augmentation_type=DAType.HEAVY,
                         **dataset_args
                     ).setup_all()
                 )
@@ -66,7 +66,7 @@ def get_datamodule(datasets: List[str], dataset_args):
                 all_datamodules.append(
                     DDRDataModule(
                         CLASSIF_PATHS.DDR, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
-                        da_type=DAType.HEAVY,
+                        data_augmentation_type=DAType.HEAVY,
                         **dataset_args
                     ).setup_all()
                 )
