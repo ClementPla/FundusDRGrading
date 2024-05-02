@@ -3,6 +3,7 @@ import os
 
 import torch
 from nntools.utils import Config
+from pl_bolts.callbacks import ORTCallback
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -11,7 +12,7 @@ from pytorch_lightning.callbacks import (
 )
 from pytorch_lightning.loggers import WandbLogger
 
-from fundusClassif.data.fundus import EyePACSDataModule
+from fundusClassif.data.data_factory import get_datamodule_from_config
 from fundusClassif.my_lightning_module import TrainerModule
 
 torch.set_float32_matmul_precision("medium")
@@ -26,7 +27,7 @@ def train(arch: str):
         try:
             runs = api.runs(f"liv4d-polytechnique/{projet_name}")
             for r in runs:
-                if r.config["model/architecture"] == architecture:
+                if r.config["model/architecture"] == architecture & (r.state == "finished" | r.state == "running"):
                     return
         except ValueError:
             print("Project not existing, starting run")
@@ -36,8 +37,11 @@ def train(arch: str):
     if os.environ.get("LOCAL_RANK", None) is None:
         os.environ["WANDB_RUN_NAME"] = wandb_logger.experiment.name
 
-    eyepacs_datamodule = EyePACSDataModule(**config["data"])
-    model = TrainerModule(config["model"], config["training"])
+    datamodule = get_datamodule_from_config(config["datasets"], config["data"])
+    
+    test_dataloader = datamodule.test_dataloader()
+    test_datasets_ids = [d.dataset.id for i, d in enumerate(test_dataloader)]
+    model = TrainerModule(config["model"], config["training"], test_datasets_ids)
 
     checkpoint_callback = ModelCheckpoint(
         monitor="Quadratic Kappa",
@@ -53,12 +57,13 @@ def train(arch: str):
         logger=wandb_logger,
         callbacks=[
             checkpoint_callback,
-            EarlyStopping(monitor="Quadratic Kappa", patience=15, mode="max"),
+            EarlyStopping(monitor="Quadratic Kappa", patience=25, mode="max"),
             LearningRateMonitor(),
+            ORTCallback()
         ],
     )
-    trainer.fit(model, datamodule=eyepacs_datamodule)
-    trainer.test(model, datamodule=eyepacs_datamodule, ckpt_path="best")
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(model, datamodule=datamodule, ckpt_path="best")
 
 
 if __name__ == "__main__":

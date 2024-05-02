@@ -2,6 +2,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
+import cv2
+from fundus_data_toolkit.data_aug import DAType
 from fundus_data_toolkit.datamodules import CLASSIF_PATHS, Task, register_paths
 from fundus_data_toolkit.datamodules.classification import (
     AptosDataModule,
@@ -35,15 +37,39 @@ def setup_data_from_config(datasets: Dict[str, str]):
 def get_datamodule(datasets: List[str], dataset_args):
     all_datamodules = []
     for d in datasets:
-        match FundusDataset(d.upper()):
+        match FundusDataset(d):
             case FundusDataset.IDRID:
-                all_datamodules.append(IDRiDDataModule(CLASSIF_PATHS.IDRID, **dataset_args).setup_all())
+                all_datamodules.append(
+                    IDRiDDataModule(
+                        CLASSIF_PATHS.IDRID, precise_autocrop=True, 
+                        da_type=DAType.HEAVY,
+                        flag=cv2.IMREAD_COLOR, **dataset_args
+                    ).setup_all()
+                )
             case FundusDataset.EYEPACS:
-                all_datamodules.append(EyePACSDataModule(CLASSIF_PATHS.EYEPACS, **dataset_args).setup_all())
+                all_datamodules.append(
+                    EyePACSDataModule(
+                        CLASSIF_PATHS.EYEPACS, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
+                        da_type=DAType.HEAVY,
+                        **dataset_args
+                    ).setup_all()
+                )
             case FundusDataset.APTOS:
-                all_datamodules.append(AptosDataModule(CLASSIF_PATHS.APTOS, **dataset_args).setup_all())
+                all_datamodules.append(
+                    AptosDataModule(
+                        CLASSIF_PATHS.APTOS, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
+                        da_type=DAType.HEAVY,
+                        **dataset_args
+                    ).setup_all()
+                )
             case FundusDataset.DDR:
-                all_datamodules.append(DDRDataModule(CLASSIF_PATHS.DDR, **dataset_args).setup_all())
+                all_datamodules.append(
+                    DDRDataModule(
+                        CLASSIF_PATHS.DDR, precise_autocrop=True, flag=cv2.IMREAD_COLOR, 
+                        da_type=DAType.HEAVY,
+                        **dataset_args
+                    ).setup_all()
+                )
     return merge_existing_datamodules(all_datamodules)
 
 
@@ -66,6 +92,7 @@ def precache_datamodule(config: Dict[str, str], dataset_args):
         test_dataloader = datamodule.test_dataloader()
         if not isinstance(test_dataloader, list):
             test_dataloader = [test_dataloader]
-        for dl in tqdm(test_dataloader, total=len(test_dataloader)):
-            for _ in dl:
+
+        for dl in test_dataloader:
+            for _ in tqdm(dl, total=len(dl)):
                 pass

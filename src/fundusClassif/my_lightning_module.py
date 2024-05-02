@@ -11,7 +11,7 @@ from fundusClassif.models.model_factory import create_model
 
 
 class TrainerModule(pl.LightningModule):
-    def __init__(self, network_config: dict, training_config: dict) -> None:
+    def __init__(self, network_config: dict, training_config: dict, test_datasets_ids: list) -> None:
         super().__init__()
 
         self.as_regression = training_config.get("as_regression", False)
@@ -41,20 +41,26 @@ class TrainerModule(pl.LightningModule):
                 ),
             }
         )
-
-        self.test_metrics = torchmetrics.MetricCollection(
-            {
-                "Test accuracy": torchmetrics.Accuracy(task="multiclass", num_classes=self.n_classes),
-                "Test recall": torchmetrics.Recall(task="multiclass", num_classes=self.n_classes),
-                "Test specificity": torchmetrics.Specificity(task="multiclass", num_classes=self.n_classes),
-                "Test precision": torchmetrics.Precision(task="multiclass", num_classes=self.n_classes),
-                "Test Quadratic Kappa": torchmetrics.CohenKappa(
-                    num_classes=self.n_classes,
-                    task="multiclass",
-                    weights="quadratic",
-                ),
-            }
-        )
+        test_metrics = []
+        for d_id in test_datasets_ids:
+            test_metrics.append(
+                torchmetrics.MetricCollection(
+                    {
+                        "Accuracy": torchmetrics.Accuracy(task="multiclass", num_classes=self.n_classes),
+                        "Recall": torchmetrics.Recall(task="multiclass", num_classes=self.n_classes),
+                        "Specificity": torchmetrics.Specificity(task="multiclass", num_classes=self.n_classes),
+                        "Precision": torchmetrics.Precision(task="multiclass", num_classes=self.n_classes),
+                        "Quadratic Kappa": torchmetrics.CohenKappa(
+                            num_classes=self.n_classes,
+                            task="multiclass",
+                            weights="quadratic",
+                        ),
+                    },
+                    postfix=f"_{d_id}",
+                )
+            )
+        self.test_metrics = nn.ModuleList(test_metrics)
+        
         mixup_config = training_config.get("mixup", None)
         if mixup_config is not None and any(
             [
@@ -106,13 +112,14 @@ class TrainerModule(pl.LightningModule):
         self.log("val_loss", loss, on_epoch=True, on_step=False, sync_dist=True)
         return {"pred": pred, "gt": gt}
 
-    def test_step(self, data, batch_index) -> STEP_OUTPUT:
+    def test_step(self, data, batch_index, dataloader_idx=0) -> STEP_OUTPUT:
         image = data["image"]
         gt = data["label"]
         logits = self.model(image)
         pred = self.get_pred(logits)
-        self.test_metrics.update(pred, gt)
-        self.log_dict(self.test_metrics, on_epoch=True, on_step=False, sync_dist=True)
+        test_metrics = self.test_metrics[dataloader_idx]
+        test_metrics.update(pred, gt)
+        self.log_dict(test_metrics, on_epoch=True, on_step=False, sync_dist=True)
 
     def configure_optimizers(self) -> Any:
         optimizer = torch.optim.AdamW(
