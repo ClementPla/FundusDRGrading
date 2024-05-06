@@ -2,6 +2,9 @@ wandb/
 wandb/*
 wandb
 
+results/
+results/*
+
 logs/
 logs/*
 
