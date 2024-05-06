@@ -23,7 +23,7 @@ def train(arch: str):
     project_name = config["logger"]["project"]
 
     
-    wandb_logger = get_wandb_logger(project_name, config.tracked_params, ('model.architecture', arch))
+    wandb_logger = get_wandb_logger(project_name, config.tracked_params, ('model/architecture', arch))
     datamodule = get_datamodule_from_config(config["datasets"], config["data"])
     
     test_dataloader = datamodule.test_dataloader()
@@ -53,8 +53,8 @@ def train(arch: str):
             LearningRateMonitor(),
         ],
     )
-    # trainer.fit(model, datamodule=datamodule)
-    trainer.test(model, dataloaders=test_dataloader)
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(model, dataloaders=test_dataloader, ckpt_path="best", verbose=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

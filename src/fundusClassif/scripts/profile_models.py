@@ -10,13 +10,15 @@ logging.basicConfig(level=logging.CRITICAL)
 if __name__ == "__main__":
     dummy_data = torch.randn(1, 3, 512, 512).cuda()
     list_models = [
+        "resnext50_32x4d.tv2_in1k",
+        "densenet121.tv_in1k",
+        "inception_v3.gluon_in1k",
         "efficientnet_b0",
         "efficientnet_b2",
         "mobilenetv3_small_100",
         "mobilevit_s",
         "resnet18",
         "tf_efficientnet_b5",
-        "efficientnet_b5",
         "resnet50",
         "seresnet50",
         "seresnext50_32x4d",
