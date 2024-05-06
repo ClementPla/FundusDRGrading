@@ -2,8 +2,9 @@ import os
 import shutil
 from pathlib import Path
 
-import wandb
 from nntools.utils import Config
+
+import wandb
 
 
 def clean_all():
@@ -27,7 +28,19 @@ def clean_from_id(run_id: int):
             pathdir = Path('checkpoints') / ckpt
             if pathdir.exists():
                 shutil.rmtree(pathdir, ignore_errors=True)
+
+def clean_all_except_from(from_project):
+    api = wandb.Api()
+    runs = api.runs(f"liv4d-polytechnique/{from_project}")
+    run_ids = [r.name for r in runs]
+    list_runs = os.listdir('checkpoints')
+    for run in list_runs:
+        if run not in run_ids:
+            pathdir = Path('checkpoints') / run
+            if pathdir.exists():
+                shutil.rmtree(pathdir, ignore_errors=True)
                 
 if __name__=='__main__':
     # clean_from_id(29)
+    # clean_all_except_from('Grading-DiabeticRetinopathy-Comparisons-V2')
     pass

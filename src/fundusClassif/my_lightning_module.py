@@ -6,6 +6,7 @@ import torch.nn as nn
 import torchmetrics
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 
+from fundusClassif.metrics.metrics_factory import get_metric
 from fundusClassif.models.model_factory import create_model
 
 
@@ -31,30 +32,13 @@ class TrainerModule(pl.LightningModule):
             self.loss = nn.CrossEntropyLoss()
 
         self.metrics = torchmetrics.MetricCollection(
-            {
-                "Accuracy": torchmetrics.Accuracy(task="multiclass", num_classes=self.n_classes),
-                "Quadratic Kappa": torchmetrics.CohenKappa(
-                    num_classes=self.n_classes,
-                    task="multiclass",
-                    weights="quadratic",
-                ),
-            }
+            metrics=get_metric(num_classes=self.n_classes), prefix="Validation "
         )
         test_metrics = []
         for d_id in test_datasets_ids:
             test_metrics.append(
                 torchmetrics.MetricCollection(
-                    {
-                        "Accuracy": torchmetrics.Accuracy(task="multiclass", num_classes=self.n_classes),
-                        "Recall": torchmetrics.Recall(task="multiclass", num_classes=self.n_classes),
-                        "Specificity": torchmetrics.Specificity(task="multiclass", num_classes=self.n_classes),
-                        "Precision": torchmetrics.Precision(task="multiclass", num_classes=self.n_classes),
-                        "Quadratic Kappa": torchmetrics.CohenKappa(
-                            num_classes=self.n_classes,
-                            task="multiclass",
-                            weights="quadratic",
-                        ),
-                    },
+                    metrics=get_metric(num_classes=self.n_classes),
                     postfix=f"_{d_id}",
                 )
             )
@@ -104,6 +88,7 @@ class TrainerModule(pl.LightningModule):
         test_metrics = self.test_metrics[dataloader_idx]
         test_metrics.update(pred, gt)
         self.log_dict(test_metrics, on_epoch=True, on_step=False, sync_dist=True)
+        return {"pred": logits, "gt": gt}
 
     def configure_optimizers(self) -> Any:
         optimizer = torch.optim.AdamW(

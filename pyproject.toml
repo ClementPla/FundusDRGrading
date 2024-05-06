@@ -16,6 +16,7 @@ dependencies = [
     "wandb",
     "torchmetrics",
     "thop",
+    "rich"
 ]
 readme = "README.md"
 
