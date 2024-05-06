@@ -2,6 +2,9 @@ wandb/
 wandb/*
 wandb
 
+logs/
+logs/*
+
 checkpoints/
 checkpoints
 checkpoints/*
