@@ -4,13 +4,14 @@ import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torchmetrics
+from huggingface_hub import PyTorchModelHubMixin
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 
 from fundusClassif.metrics.metrics_factory import get_metric
 from fundusClassif.models.model_factory import create_model
 
 
-class TrainerModule(pl.LightningModule):
+class TrainerModule(pl.LightningModule, PyTorchModelHubMixin):
     def __init__(self, network_config: dict, training_config: dict, test_datasets_ids: list) -> None:
         super().__init__()
 

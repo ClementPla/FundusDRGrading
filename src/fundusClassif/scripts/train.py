@@ -33,7 +33,7 @@ def train(arch: str):
     training_callbacks = get_callbacks(config['training'])
     
     checkpoint_callback = ModelCheckpoint(
-        monitor="Quadratic Kappa",
+        monitor="Validation Quadratic Kappa",
         mode="max",
         save_last=True,
         auto_insert_metric_name=True,
@@ -47,9 +47,9 @@ def train(arch: str):
         callbacks=[
             *training_callbacks,
             ResultSaver(os.path.join("results", project_name)),
-            RichProgressBar(),
+            # RichProgressBar(),
             checkpoint_callback,
-            EarlyStopping(monitor="Quadratic Kappa", patience=25, mode="max"),
+            EarlyStopping(monitor="Validation Quadratic Kappa", patience=25, mode="max"),
             LearningRateMonitor(),
         ],
     )

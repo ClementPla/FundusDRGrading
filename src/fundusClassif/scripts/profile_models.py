@@ -3,39 +3,21 @@ import logging
 import pandas as pd
 import timm
 import torch
+from nntools.utils import Config
 from thop import clever_format, profile
+
+import wandb
 
 logging.basicConfig(level=logging.CRITICAL)
 
 if __name__ == "__main__":
+    config = Config("configs/config.yaml")
     dummy_data = torch.randn(1, 3, 512, 512).cuda()
-    list_models = [
-        "resnext50_32x4d.tv2_in1k",
-        "densenet121.tv_in1k",
-        "inception_v3.gluon_in1k",
-        "efficientnet_b0",
-        "efficientnet_b2",
-        "mobilenetv3_small_100",
-        "mobilevit_s",
-        "resnet18",
-        "tf_efficientnet_b5",
-        "resnet50",
-        "seresnet50",
-        "seresnext50_32x4d",
-        "convnext_small",
-        "swinv2_base_window16_256",
-        "convnext_base",
-        "vit_base_patch16_384",
-        "vgg19_bn",
-        "swinv2_large_window12to16_192to256.ms_in22k_ft_in1k",
-        "convnext_large",
-        "vit_large_patch16_384",
-        "vit_base_patch14_dinov2",
-        "vit_large_patch14_dinov2",
-        "vit_small_patch14_dinov2",
-        "vit_base_patch14_reg4_dinov2.lvd142m",
-        "vit_large_patch14_reg4_dinov2.lvd142m",
-    ]
+    api = wandb.Api()
+    project_name = config["logger"]["project"]
+    runs = api.runs(f"liv4d-polytechnique/{project_name}")
+    list_models = [r.config["model/architecture"] for r in list(runs)]
+    
     results = {"Model": [], "MACs": [], "Params": []}
     for m in list_models:
         with torch.autocast("cuda"):
